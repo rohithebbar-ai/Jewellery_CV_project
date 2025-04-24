@@ -11,24 +11,27 @@ This repository implements a two-stage pipeline to detect and track rings on Ann
 ## Repository Structure
 ```
 Jewellery_CV_project/
-├── data/                # raw videos, extracted frames
-│   ├── anna_demo.mp4
-│   └── frames/
-├── scripts/             # core pipeline scripts
-│   ├── hand_landmarker.py
-│   ├── train.py
-│   └── video_inference.py
+
+├── scripts/          # core pipeline scripts
+|   └── mediapipe_hand_detection/
+│       ├── hand_landmarker.py
+│       ├── main.py
+|       ├── ring_candidates.py
+|   └── ring_detection_yolov8/
+│       ├── convert_all_labels_to_yolo.py
+│       ├── train.py
+|       ├── video_inference.py
+|       └── utils/
+│           ├── drawing_utils.py
+│           ├── mediapipe_utils.py
+|           ├── ring_finger_matcher.py
 ├── models/              # trained model weights and configs
 │   └── ring_detector/
 │       ├── weights/best.pt
 │       └── labels.jpg   # plotted label distribution
-├── results/             # visualizations and logs
-│   ├── runs/train/      # TensorBoard logs (optional)
-│   ├── val_batch_pred.jpg
-│   └── metrics_plots.png
-├── configs/             # JSON/ YAML config files
-│   ├── config_mediapipe.json
-│   └── config_yolo.json
+├         
+│── config_mediapipe.json # JSON/ YAML config files
+│- config_yolo.json
 ├── README.md            # this file
 └── requirements.txt     # pip install dependencies
 ```
