@@ -1,0 +1,8 @@
+{
+    "video_path": "data/anna_demo.mp4",
+    "frames_dir": "data/frames",
+    "results_dir": "results",
+    "patches_dir": "results/patches",
+    "landmarks_file": "results/landmarks.json",
+    "patch_size": 50
+}
