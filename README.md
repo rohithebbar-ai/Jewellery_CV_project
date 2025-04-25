@@ -36,6 +36,9 @@ Jewellery_CV_project/
 └── requirements.txt     # pip install dependencies
 ```
 
+The input video of Anna wearing two rings is also taken from open source website (pexels). The link to this can be found here.
+https://drive.google.com/drive/folders/1K7d8S23CNhajPP5urI9vxSbaihlwNwh2?usp=sharing
+
 ## Setup & Installation
 1. **Clone** this repository:
    ```bash
@@ -49,6 +52,9 @@ Jewellery_CV_project/
    pip install -r requirements.txt
    ```
 3. **Download MediaPipe models** (if needed) and place at `venv/lib/python*/site-packages/mediapipe/models/`.
+
+4. If you want to use the dataset for finetuning yolo for ring detection then you can download it on this link. All the data is taken from open source and manually labelled using labellmg.
+ https://drive.google.com/drive/folders/1YCnSLYkh-kb_fMOOBuTN2BkdPO3fovNr?usp=sharing
 
 ## Running the Pipeline
 
@@ -75,20 +81,20 @@ python scripts/video_inference.py \
 
 ## Experiments & Decision Log
 - **Approaches tried**:
-  - Direct YOLOv8 on full frames (high false positive on bracelets) 🗙
   - MediaPipe → YOLO crop pipeline (current) ✔️
   - Mask-RCNN segmentation head (future work)
   - CAD overlay via PyTorch3D (not enough time)
 
 - **Data & Augmentations**:
-  - ~150 ring-on-hand images hand-annotated
+  - ~50 ring-on-hand images hand-annotated
   - RandAugment + MixUp + Mosaic improved recall by ~10%
   - Hard negatives (empty-hand, bracelets only) reduced false positives
 
 - **Results**:
   - mAP@0.5: **0.77** on held-out set
-  - Average center-jitter < 3 px over 100 frames
   - Visual outputs: `results/metrics_plots.png`, `results/val_batch_pred.jpg`
+  - The output data and results from yolov8 can be found here. 
+https://drive.google.com/drive/folders/1obQbFBas9fBcFqtzuC62j3nWm8QUYwjf?usp=sharing
 
 ## Next Steps
 - Add **instance segmentation** for pixel-precise ring masks
