@@ -5,13 +5,15 @@ import os
 import mediapipe as mp
 
 # Load config
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-with open(os.path.join(BASE_DIR, 'config.json')) as f:
+HERE = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(HERE, 'config_mediapipe.json')
+with open(CONFIG_PATH, 'r') as f:
     cfg = json.load(f)
 
-VIDEO_PATH = os.path.join(BASE_DIR, cfg['video_path'])
-LANDMARKS_FILE = os.path.join(BASE_DIR, cfg['landmarks_file'])
-RESULTS_DIR = os.path.join(BASE_DIR, cfg['results_dir'])
+
+VIDEO_PATH = cfg['video_path']
+LANDMARKS_FILE = cfg['landmarks_file']
+RESULTS_DIR = cfg['results_dir']
 
 class HandLandmarker:
     def __init__(self, min_detection_confidence=0.5):
@@ -48,9 +50,9 @@ class HandLandmarker:
                         'landmarks': coords
                     })
 
-            cv2.imshow('MediaPipe Hands', frame)
-            if cv2.waitKey(1) & 0xFF == 27:
-                break
+            #cv2.imshow('MediaPipe Hands', frame)
+            #if cv2.waitKey(1) & 0xFF == 27:
+            #    break
             frame_idx += 1
 
         cap.release()
