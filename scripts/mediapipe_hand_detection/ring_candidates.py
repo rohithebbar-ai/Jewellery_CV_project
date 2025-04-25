@@ -4,13 +4,15 @@ import json
 import numpy as np 
 
 #Load config
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-with open(os.path.join(BASE_DIR,'config.json')) as f:
+HERE = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(HERE, 'config_mediapipe.json')
+with open(CONFIG_PATH, 'r') as f:
     cfg = json.load(f)
 
-FRAMES_DIR = os.path.join(BASE_DIR, cfg['frames_dir'])
-PATCHES_DIR = os.path.join(BASE_DIR, cfg['patches_dir'])
-LANDMARKS_FILE = os.path.join(BASE_DIR, cfg['landmarks_file'])
+
+FRAMES_DIR =  cfg['frames_dir']
+PATCHES_DIR =  cfg['patches_dir']
+LANDMARKS_FILE = cfg['landmarks_file']
 PATCH_SIZE = cfg['patch_size']
 
 class RingCandidateExtractor:
