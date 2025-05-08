@@ -185,11 +185,11 @@ The metrics on inference video is :
 
 
 <div style="display: inline-block; text-align: center; width: 45%;">
-  <img src="Assets/Inference_video_snapshot_1.png" width="100%" />
+  <img src="Assets/Inference_video_snapshot_1.png" width="50%" />
   <p><em>Ring on left thumb</em></p>
 </div>
 <div style="display: inline-block; text-align: center; width: 45%;">
-  <img src="Assets/Inference_video_snapshot_2.png" width="100%" />
+  <img src="Assets/Inference_video_snapshot_2.png" width="50%" />
   <p><em>Ring on right middle finger</em></p>
 </div>
 
