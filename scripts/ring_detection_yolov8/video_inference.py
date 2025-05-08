@@ -1,146 +1,54 @@
+#!/usr/bin/env python3
 """
-Run the fine-tuned YOLOv8 ring detector on a demo video
-draw bounding box and confidence scores and display in real time.
-
+Ring-on-hand tracking + segmentation inference script.
+"""
 
 import argparse
-import cv2
-from ultralytics import YOLO
-import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import sys
+import csv
+import pickle
+from time import perf_counter
+from collections import defaultdict
 
-from utils.mediapipe_utils import get_hand_landmarks
-from utils.ring_finger_matcher import find_closest_landmark
-
-def parse_args():
-    p = argparse.ArgumentParser(description="Ring-on-hand video inference")
-    p.add_argument(
-        "--model",
-        type=str,
-        default='models/ring_detector/weights/best.pt',
-        help="Path to your fine-tuned YOLOv8 .pt file"
-    )
-    p.add_argument(
-        "--source",
-        type=str,
-        default="/home/zeus/workspace/Jewellery_CV_project/data/anna_demo_2.mp4",
-        help="Path to your input data (video file) - .mp4,.avi, etc"
-    )
-    p.add_argument(
-        "--conf",
-        type=float,
-        default=0.41,
-        help="Detection confidence threshold"
-    )
-    p.add_argument(
-        "--iou",
-        type=float,
-        default=0.45,
-        help="NMS IoU threshold",
-    )
-    p.add_argument(
-        "--out",
-        type=str,
-        default="annotated_demo.mp4",
-        help="Where to save the annotated output video"
-    )
-
-    return p.parse_args()
-
-def main():
-    args = parse_args()
-
-    # 1) Load the model
-    model = YOLO(args.model)
-
-    # 2) Open Video
-    cap = cv2.VideoCapture(args.source)
-    if not cap.isOpened():
-        print(f"[ERROR] Could not open the video: {args.source}")
-        return
-
-    # ── CHANGED: set up VideoWriter with robust FOURCC lookup
-    if hasattr(cv2, 'VideoWriter_fourcc'):
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    elif hasattr(cv2.VideoWriter, 'fourcc'):
-        fourcc = cv2.VideoWriter.fourcc(*'mp4v')
-    else:
-        fourcc = cv2.cv.CV_FOURCC(*'mp4v')
-
-    fps    = cap.get(cv2.CAP_PROP_FPS)
-    width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out    = cv2.VideoWriter(args.out, fourcc, fps, (width, height))
-    print(f"[INFO] Writing annotated video to: {args.out}")
-
-
-    # 3) Process the frames
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        # Get hand landmarks
-        hand_landmarks = get_hand_landmarks(frame)
-
-        # Run detection on thr raw frame
-        results = model(frame, conf=args.conf, iou=args.iou)[0]
-
-        # Draw boxes + confidences
-        for box in results.boxes:
-            # box.xyxy is a tensor [[x1, y1, x2, y2]]
-            x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
-            conf = float(box.conf[0])
-            ring_center = [(x1 + x2) / 2 / width, (y1 + y2) / 2 /height]
-
-            #Find closest landmark (e.g ring finger)
-            closest_id = find_closest_landmark(ring_center, hand_landmarks)
-            finger_name = f"Landmark ID: {closest_id}" if closest_id is not None else "Unknown"
-            
-
-            # draw a rectangle
-            cv2.rectangle(frame, (x1,y1), (x2,y2), (0,255,0), 4)
-            cv2.putText(
-                frame,
-                f"{conf:.2f}",
-                (x1, y1 - 10),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1.0,
-                (255, 255, 255),
-                2,
-                cv2.LINE_AA,
-            )
-
-        # Show
-        out.write(frame)
-
-
-    # cleanup
-    cap.release()
-    out.release()
-
-
-if __name__ == "__main__":
-    main()"""
-
-
-
-"""
-# 3D coordinates
-
-import argparse, os, sys
 import cv2
 import mediapipe as mp
-from deep_sort_realtime.deepsort_tracker import DeepSort
 from ultralytics import YOLO
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from deep_sort_realtime.deepsort_tracker import DeepSort
 
-from utils.mediapipe_utils import get_hand_landmarks
-from utils.ring_finger_matcher import find_closest_landmark_3d
-from utils.drawing_utils import draw_box_with_label
+# allow imports from utils folder
+SCRIPT_DIR = os.path.dirname(__file__)
+UTILS_DIR  = os.path.join(SCRIPT_DIR, 'utils')
+sys.path.insert(0, UTILS_DIR)
+
+from mediapipe_utils import get_hand_landmarks
+from ring_finger_matcher import find_closest_landmark_3d
+from drawing_utils import draw_box_with_label
+
+# metrics
+from metrics import (
+    compute_detection_metrics,
+    compute_iou_stats,
+    compute_association_accuracy,
+    compute_tracking_metrics,
+    compute_stability_metrics,
+)
+
+PALETTE = [
+    (255,  80,  80), ( 80, 255,  80), ( 80,  80, 255),
+    (255, 255,  80), (255,  80, 255), ( 80, 255, 255),
+    (128,   0,   0), (  0, 128,   0), (  0,   0, 128),
+]
+
+FINGER2ID = {"Thumb":0, "Index":1, "Middle":2, "Ring":3, "Pinky":4}
+
+def finger_name(lm_idx):
+    if lm_idx is None: return "Unknown"
+    if lm_idx <= 4:    return "Thumb"
+    if lm_idx <= 8:    return "Index"
+    if lm_idx <= 12:   return "Middle"
+    if lm_idx <= 16:   return "Ring"
+    return "Pinky"
 
 def parse_args():
     p = argparse.ArgumentParser()
@@ -148,250 +56,160 @@ def parse_args():
     p.add_argument("--source", default="data/anna_demo_2.mp4")
     p.add_argument("--conf",   type=float, default=0.41)
     p.add_argument("--iou",    type=float, default=0.45)
-    p.add_argument("--out",    default="annotated_demo.mp4")
+    p.add_argument("--out",    default="annotated.mp4")
+    p.add_argument("--csv",    default="tracks.csv")
+    p.add_argument("--gt",     default="processed_gt.pkl")
     return p.parse_args()
 
 def main():
     args = parse_args()
+
+    # load models
     model = YOLO(args.model)
     cap   = cv2.VideoCapture(args.source)
     if not cap.isOpened():
         raise RuntimeError(f"Cannot open {args.source}")
 
-    # VideoWriter setup
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    fps    = cap.get(cv2.CAP_PROP_FPS)
-    W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out = cv2.VideoWriter(args.out, fourcc, fps, (W, H))
-    print(f"[INFO] Writing → {args.out}")
-
-    mp_draw       = mp.solutions.drawing_utils
-    mp_hands_mod  = mp.solutions.hands
-
-    tracker = DeepSort(
-        max_age=30,    # frames to keep “lost” tracks alive
-        n_init=3,      # frames before confirming a new track
-        max_cosine_distance=0.4,
-        embedder="mobilenet",  # or your preferred small CNN
-    )
-
-    while True:
-        ret, frame = cap.read()
-        if not ret: break
-
-        # 1) detect hands
-        hand_landmarks = get_hand_landmarks(frame)
-
-        # 2) draw them
-        for hand in hand_landmarks:
-            mp_draw.draw_landmarks(
-                frame, hand, mp_hands_mod.HAND_CONNECTIONS,
-                mp_draw.DrawingSpec(color=(0,255,255), thickness=1, circle_radius=2),
-                mp_draw.DrawingSpec(color=(0,128,255), thickness=1),
-            )
-
-        # 3) detect rings
-        results = model(frame, conf=args.conf, iou=args.iou)[0]
-
-        # 4) for each ring, find & draw its nearest finger landmark
-        for box in results.boxes:
-            x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
-            conf = box.conf[0].item()
-            # ring center in normalized coords
-            ring_cx = ((x1 + x2) / 2) / W
-            ring_cy = ((y1 + y2) / 2) / H
-
-            hand_idx, lm_idx = find_closest_landmark_3d(
-                                                (ring_cx, ring_cy),
-                                                hand_landmarks,
-                                                angle_thresh=0.6
-                                            )
-
-            if hand_idx is not None:
-                lm = hand_landmarks[hand_idx].landmark[lm_idx]
-                lm_px = (int(lm.x * W), int(lm.y * H))
-                ring_c_px = (int((x1 + x2) / 2), int((y1 + y2) / 2))
-
-                # draw connection line + landmark dot
-                cv2.circle(frame, lm_px, 5, (0,0,255), -1)
-                cv2.line(frame, ring_c_px, lm_px, (255,0,0), 2)
-
-                label = f"{conf:.2f} | Finger {lm_idx}"
-            else:
-                label = f"{conf:.2f} | Unknown"
-
-            draw_box_with_label(frame, (x1, y1, x2, y2), label)
-
-        out.write(frame)
-
-    cap.release()
-    out.release()
-
-if __name__ == "__main__":
-    main()
-"""
-
-
-#!/usr/bin/env python3
-import argparse, os, sys
-import cv2
-import mediapipe as mp
-from deep_sort_realtime.deepsort_tracker import DeepSort
-from ultralytics import YOLO
-
-# allow imports from project root
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from utils.mediapipe_utils import get_hand_landmarks
-from utils.ring_finger_matcher import find_closest_landmark_3d
-from utils.drawing_utils import draw_box_with_label
-
-# a small palette of distinct BGR colors for different tracks
-PALETTE = [
-    (255,  80,  80),
-    ( 80, 255,  80),
-    ( 80,  80, 255),
-    (255, 255,  80),
-    (255,  80, 255),
-    ( 80, 255, 255),
-    (128,   0,   0),
-    (  0, 128,   0),
-    (  0,   0, 128),
-]
-
-def finger_name(lm_idx):
-    """Convert a MediaPipe landmark index into a human-readable finger name."""
-    if lm_idx is None:
-        return "Unknown"
-    if lm_idx <= 4:
-        return "Thumb"
-    elif lm_idx <= 8:
-        return "Index"
-    elif lm_idx <= 12:
-        return "Middle"
-    elif lm_idx <= 16:
-        return "Ring"
-    else:
-        return "Pinky"
-
-def parse_args():
-    p = argparse.ArgumentParser(description="Ring-on-hand tracking + finger assignment")
-    p.add_argument("--model",  default="models/ring_detector/weights/best.pt",
-                   help="Path to YOLOv8 ring detector (.pt)")
-    p.add_argument("--source", default="data/anna_demo_2.mp4",
-                   help="Path to input video")
-    p.add_argument("--conf",   type=float, default=0.41,
-                   help="YOLO detection confidence threshold")
-    p.add_argument("--iou",    type=float, default=0.45,
-                   help="YOLO NMS IoU threshold")
-    p.add_argument("--out",    default="annotated_demo.mp4",
-                   help="Where to save output video")
-    return p.parse_args()
-
-def main():
-    args = parse_args()
-    model = YOLO(args.model)
-    cap   = cv2.VideoCapture(args.source)
-    if not cap.isOpened():
-        raise RuntimeError(f"Cannot open video: {args.source}")
-
-    # prepare output writer
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     fps    = cap.get(cv2.CAP_PROP_FPS)
     W      = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     H      = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out    = cv2.VideoWriter(args.out, fourcc, fps, (W, H))
-    print(f"[INFO] Writing annotated video to: {args.out}")
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out_vid = cv2.VideoWriter(args.out, fourcc, fps, (W, H))
+    print(f"[INFO] Writing → {args.out}")
+
+    csv_file = open(args.csv, 'w', newline='')
+    writer   = csv.writer(csv_file)
+    writer.writerow(["frame_idx","track_id","x1","y1","x2","y2","conf","finger"])
 
     mp_draw      = mp.solutions.drawing_utils
     mp_hands_mod = mp.solutions.hands
+    tracker = DeepSort(max_age=30, n_init=3,
+                       max_cosine_distance=0.4,
+                       embedder="mobilenet")
 
-    # initialize DeepSORT
-    tracker = DeepSort(
-        max_age=30,               # keep lost tracks for 30 frames
-        n_init=3,                 # require 3 hits before confirmation
-        max_cosine_distance=0.4,  # appearance distance threshold
-        embedder="mobilenet",     # small CNN for appearance
-    )
-
+    frame_idx = 0
     while True:
         ret, frame = cap.read()
-        if not ret:
-            break
+        if not ret: break
+        t0 = perf_counter()
 
-        # 1) detect hands & draw skeleton
-        hand_landmarks = get_hand_landmarks(frame)
-        for hand in hand_landmarks:
+        # hand landmarks
+        hands = get_hand_landmarks(frame)
+        for hand in hands:
             mp_draw.draw_landmarks(
                 frame, hand, mp_hands_mod.HAND_CONNECTIONS,
-                mp_draw.DrawingSpec(color=(0,255,255), thickness=1, circle_radius=2),
-                mp_draw.DrawingSpec(color=(0,128,255), thickness=1),
+                mp_draw.DrawingSpec((0,255,255),1,2),
+                mp_draw.DrawingSpec((0,128,255),1)
             )
 
-        # 2) run YOLO ring detection
-        yolo_results = model(frame, conf=args.conf, iou=args.iou)[0]
-
-        # 3) convert to DeepSORT’s expected (tlwh, confidence, class) format
-        detections = []
-        for box in yolo_results.boxes:
-            x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
-            w = x2 - x1
-            h = y2 - y1
+        # YOLO detection
+        yres = model(frame, conf=args.conf, iou=args.iou)[0]
+        dets = []
+        for box in yres.boxes:
+            x1,y1,x2,y2 = map(int, box.xyxy[0].tolist())
+            w,h = x2-x1, y2-y1
             conf_score = float(box.conf[0])
-            detections.append(([x1, y1, w, h], conf_score, "ring"))
+            dets.append(([x1,y1,w,h], conf_score, "ring"))
 
-        # 4) update DeepSORT tracker
-        tracks = tracker.update_tracks(detections, frame=frame)
+        # DeepSORT
+        tracks = tracker.update_tracks(dets, frame=frame)
 
-        # 5) draw each confirmed track + finger assignment
-        for track in tracks:
-            if not track.is_confirmed():
-                continue
+        # draw & log
+        for t in tracks:
+            if not t.is_confirmed(): continue
+            tid       = int(t.track_id)
+            x1,y1,x2,y2 = map(int, t.to_tlbr())
+            color     = PALETTE[tid % len(PALETTE)]
+            cx,cy     = (x1+x2)//2, (y1+y2)//2
+            rcx,rcy   = cx/W, cy/H
 
-            tid = int(track.track_id)  # ensure integer
-            x1, y1, x2, y2 = map(int, track.to_tlbr())
+            # finger match
+            hidx,lmidx = find_closest_landmark_3d((rcx,rcy), hands, angle_thresh=0.6)
+            if hidx is not None:
+                lm = hands[hidx].landmark[lmidx]
+                lpx = (int(lm.x*W), int(lm.y*H))
+                cv2.circle(frame, lpx, 5, (0,0,255), -1)
+                cv2.line(frame, (cx,cy), lpx, (255,0,0),2)
 
-            # compute ring center in normalized coords
-            ring_cx = ((x1 + x2) / 2) / W
-            ring_cy = ((y1 + y2) / 2) / H
-
-            # 3D-aware finger matching
-            hand_idx, lm_idx = find_closest_landmark_3d(
-                (ring_cx, ring_cy),
-                hand_landmarks,
-                angle_thresh=0.6
-            )
-
-            # draw connection line + landmark dot if we found one
-            if hand_idx is not None:
-                lm = hand_landmarks[hand_idx].landmark[lm_idx]
-                lm_px = (int(lm.x * W), int(lm.y * H))
-                ring_center_px = (int((x1 + x2) / 2), int((y1 + y2) / 2))
-                cv2.circle(frame, lm_px, 6, (0, 0, 255), -1)
-                cv2.line(frame, ring_center_px, lm_px, (255, 0, 0), 2)
-
-            # assemble label: “ID3 | Ring” or “ID7 | Index”
-            label = f"ID{tid} | {finger_name(lm_idx)}"
-
-            # pick a stable color per track
-            color = PALETTE[tid % len(PALETTE)]
-
+            finger = finger_name(lmidx)
             draw_box_with_label(
-                frame,
-                (x1, y1, x2, y2),
-                label,
-                color=color,
-                box_thickness=4,
-                font_scale=1.5,
-                font_thickness=3
+                frame, (x1,y1,x2,y2),
+                f"ID{tid} | {finger}",
+                color=color, box_thickness=4,
+                font_scale=1.0, font_thickness=2
             )
+            conf_val = getattr(t, "detection_confidence", 0.0)
+            writer.writerow([frame_idx, tid, x1,y1,x2,y2, f"{conf_val:.2f}", finger])
 
-        out.write(frame)
+        out_vid.write(frame)
+        dt = (perf_counter()-t0)*1000
+        if dt>66: print(f"[WARN] Frame {frame_idx} took {dt:.1f}ms")
+        frame_idx += 1
 
+    # finish
     cap.release()
-    out.release()
-    print("[INFO] Done.")
+    out_vid.release()
+    csv_file.close()
+    print("[INFO] Inference done. Computing metrics…")
+
+    # load GT
+    with open(args.gt,'rb') as f:
+        gt = pickle.load(f)
+    gt_boxes     = gt['gt_boxes']
+    gt_assoc     = gt['gt_assoc']
+    gt_tracks    = gt['gt_tracks']
+    tracks_by_id = gt['tracks_by_id']
+
+    def idx_to_fname(idx):
+        return f"frame_{idx+1:06d}.jpg"
+    # map frame_idx→filename
+    #frame_fnames = sorted(gt_boxes.keys())
+
+    # parse predictions
+    pred_boxes  = defaultdict(list)
+    pred_assoc  = {}
+    pred_tracks = defaultdict(list)
+    pred_by_id  = defaultdict(list)
+
+    with open(args.csv) as f:
+        rd = csv.DictReader(f)
+        for row in rd:
+            idx = int(row['frame_idx'])
+            tid = int(row['track_id'])
+            x1,y1,x2,y2 = map(int,(row['x1'],row['y1'],row['x2'],row['y2']))
+            finger = row['finger']
+
+            fname = idx_to_fname(idx)
+            if fname not in gt_boxes:
+                continue
+            pred_boxes[fname].append([x1,y1,x2,y2])
+            pred_assoc[(fname,tid)] = FINGER2ID.get(finger,-1)
+            pred_tracks[fname].append((tid,[x1,y1,x2,y2]))
+            pred_by_id[tid].append((fname,[x1,y1,x2,y2]))
+    
+    # ─── DEBUG: Check predictions on each GT frame ───────────────────────
+    print(f"[DEBUG] GT has {len(gt_boxes)} annotated frames")
+    for f in gt_boxes:
+        print(f"[DEBUG] Frame '{f}' → #predictions: {len(pred_boxes.get(f, []))}")
+
+    
+    print("Sample pred_boxes:", list(pred_boxes.items())[:5])
+    print("Sample gt_boxes:   ", list(gt_boxes.items())[:5])
+
+    # compute metrics
+    detm   = compute_detection_metrics(gt_boxes, pred_boxes, iou_thresh=0.5)
+    ioum   = compute_iou_stats(gt_boxes, pred_boxes)
+    assocm = compute_association_accuracy(gt_assoc, pred_assoc)
+    motm   = compute_tracking_metrics(gt_tracks, pred_tracks)
+    stabm  = compute_stability_metrics(tracks_by_id)
+
+    print("\n=== METRICS SUMMARY ===")
+    print("Detection      :", detm)
+    print("IoU stats      :", ioum)
+    print("Assoc Accuracy :", assocm)
+    print("Tracking       :", motm)
+    print("Stability      :", stabm)
+    print("[INFO] All done.")
 
 if __name__ == "__main__":
     main()
