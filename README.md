@@ -188,10 +188,10 @@ The metrics on inference video is :
   <img src="Assets/Inference_video_snapshot_2.png" width="45%" />
 </p>
 
-<p float="left">
-  <em style="margin-right: 40%;">Ring on left thumb</em>
-  <em>Ring on right middle finger</em>
-</p>
+<div style="display: flex; justify-content: space-between; width: 90%;">
+  <em style="width: 45%; text-align: center;">Ring on left thumb</em>
+  <em style="width: 45%; text-align: center;">Ring on right middle finger</em>
+</div>
 
 ## ⚠️ Limitations 
 
