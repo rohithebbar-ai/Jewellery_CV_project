@@ -183,18 +183,15 @@ The metrics on inference video is :
 | Stability      | area_var_norm (ID -1)      | 1.000000    |
 | Stability      | angle_std (ID -1)          | 0.000000    |
 
+<p float="left">
+  <img src="assets/hand_ring_1.png" width="45%" />
+  <img src="assets/hand_ring_2.png" width="45%" />
+</p>
 
-## 🖼 Sample Visualizations
-
-Below are example frames showing ring detection and finger association:
-
-![Ring detection example 1](Assets/Inference_video_snapshot_1.png)
-*Ring detected and falsely associated with left thumb.*
-
-
-![Ring detection example 2](Assets/Inference_video_snapshot_2.png)
-
-*Ring detected and correctly associated with right middle finger.*
+<p float="left">
+  <em style="margin-right: 40%;">Ring on left thumb</em>
+  <em>Ring on right middle finger</em>
+</p>
 
 ## ⚠️ Limitations 
 
