@@ -183,14 +183,14 @@ The metrics on inference video is :
 | Stability      | area_var_norm (ID -1)      | 1.000000    |
 | Stability      | angle_std (ID -1)          | 0.000000    |
 
-<p float="left">
-  <img src="Assets/Inference_video_snapshot_1.png" width="45%" />
-  <img src="Assets/Inference_video_snapshot_2.png" width="45%" />
-</p>
 
-<div style="display: flex; justify-content: space-between; width: 300%;">
-  <em style="width: 45%; text-align: left;">Ring on left thumb</em>
-  <em style="width: 45%; text-align: right;">Ring on right middle finger</em>
+<div style="display: inline-block; text-align: center; width: 45%;">
+  <img src="Assets/Inference_video_snapshot_1.png" width="100%" />
+  <p><em>Ring on left thumb</em></p>
+</div>
+<div style="display: inline-block; text-align: center; width: 45%;">
+  <img src="Assets/Inference_video_snapshot_2.png" width="100%" />
+  <p><em>Ring on right middle finger</em></p>
 </div>
 
 ## ⚠️ Limitations 
