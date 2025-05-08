@@ -223,7 +223,7 @@ High drift values (e.g., 832 px max drift for ID 2) and varying area/angle consi
 The mean IoU of ~24% and median IoU of ~6% suggest a mismatch between predicted and ground-truth ring regions. This reflects poor spatial alignment, which may stem from inaccurate bounding box predictions or temporal inconsistencies.
 
 
-🔧 Future Work
+## 🔧 Future Work
 - Improve Ring Detection Accuracy:
 Augment the training dataset with more diverse hand poses, lighting conditions, and ring styles. Use techniques like data augmentation, synthetic data generation, or transfer learning from larger object detection models.
 - Enhance Finger-Ring Association Logic:
