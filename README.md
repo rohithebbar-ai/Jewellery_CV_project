@@ -13,10 +13,10 @@ This repository implements a two-stage pipeline to detect and track rings on Ann
 Jewellery_CV_project/
 
 ├── scripts/          # core pipeline scripts
-|   └── mediapipe_hand_detection/
-│       ├── hand_landmarker.py
-│       ├── main.py
-|       ├── ring_candidates.py
+|   |── mediapipe_hand_detection/
+│   |   ├── hand_landmarker.py
+│   |   ├── main.py
+|   |   ├── ring_candidates.py
 |   └── ring_detection_yolov8/
 │       ├── convert_all_labels_to_yolo.py
 │       ├── train.py
@@ -31,7 +31,7 @@ Jewellery_CV_project/
 │       └── labels.jpg   # plotted label distribution
 ├         
 │── config_mediapipe.json # JSON/ YAML config files
-│- config_yolo.json
+|__ config_yolo.json
 ├── README.md            # this file
 └── requirements.txt     # pip install dependencies
 ```
