@@ -113,6 +113,8 @@ This will:
 
 ## 📊 Metrics Evaluation
 
+For this video i converted them into frames and there were 1210 frames, however annotating every frame was a tedious task and it has to be manual annotation so i took random unbiased 50 frames using the script 'ring_detection_yolov8/test_label_annotation.py'
+
 ### Step 2: Convert VIA annotations to GT format
 
 ```bash
@@ -182,16 +184,52 @@ The metrics on inference video is :
 | Stability      | angle_std (ID -1)          | 0.000000    |
 
 
-## 🔭 Limitations & Future Work
+## 🖼 Sample Visualizations
+
+Below are example frames showing ring detection and finger association:
+
+![Ring detection example 1](assets/inference_video_snapshot_1.png)
+*Ring detected and associated with left thumb.*
+
+![Ring detection example 2](assets/Inference_video_snapshot_2.png)
+*Ring detected and associated with right middle finger.*
+
+## ⚠️ Limitations 
 
 - MediaPipe fails in cases of occlusion or motion blur
 - Only YOLO bounding boxes used; segmentation masks not trained
-- Could try:
-  - SAHI for small-object boosting
-  - Add **instance segmentation** for pixel-precise ring masks
-  - YOLOv8-seg with re-annotated mask labels
-  - Replace MediaPipe with 3D hand pose model (e.g. FrankMocap)
-  - Evaluate on longer videos and more lighting conditions
+- Low Detection Precision and Recall:
+The detection module achieved only ~25% precision and ~26% recall, indicating that many rings are either missed or falsely detected. This could be due to limited training data, challenging lighting conditions, occlusions, or small ring sizes in the input frames.
+- Poor Association Accuracy:
+The association module shows an accuracy of 0.0, suggesting it is currently unable to reliably link detected rings to specific fingers across frames, which impacts consistent tracking.
+- Weak Tracking Performance:
+With a MOTA of ~15.8% and IDF1 of ~21.8%, the tracking pipeline struggles to maintain consistent identities, likely due to frequent ID switches (20 total) and ambiguous finger-ring assignments in cluttered or fast-moving scenes.
+- Unstable Localization (Stability Metrics):
+High drift values (e.g., 832 px max drift for ID 2) and varying area/angle consistency indicate instability in ring localization, especially across time. This makes it less reliable for long or real-time sequences.
+- Low IoU Scores:
+The mean IoU of ~24% and median IoU of ~6% suggest a mismatch between predicted and ground-truth ring regions. This reflects poor spatial alignment, which may stem from inaccurate bounding box predictions or temporal inconsistencies.
+
+
+🔧 Future Work
+- Improve Ring Detection Accuracy:
+Augment the training dataset with more diverse hand poses, lighting conditions, and ring styles. Use techniques like data augmentation, synthetic data generation, or transfer learning from larger object detection models.
+- Enhance Finger-Ring Association Logic:
+Incorporate temporal context, such as tracking hand landmarks across frames, or introduce graph-based matching algorithms to better associate rings with specific fingers consistently.
+- Refine Tracking Pipeline:
+Explore advanced trackers (e.g., ByteTrack, DeepSORT with re-ID) or fine-tune tracking heuristics to reduce ID switches and maintain identity persistence over time.
+- Increase Localization Stability:
+Apply temporal smoothing filters (e.g., Kalman filter or exponential moving averages) on the ring position and orientation to reduce drift and jitter in dynamic scenes.
+- Optimize Bounding Box Alignment:
+Improve post-processing using IoU-based refinements or regression heads to better match predicted boxes with true ring shapes, possibly leveraging segmentation masks instead of just bounding boxes.
+- Real-Time Evaluation:
+Profile runtime performance and explore model quantization or ONNX/TensorRT conversion for real-time inference on edge devices or embedded platform.
+
+Could also try:
+   - SAHI for small-object boosting
+   - Add instance segmentation for pixel-precise ring masks
+   - YOLOv8-seg with re-annotated mask labels
+   - Replace MediaPipe with 3D hand pose model (e.g. FrankMocap)
+   - Evaluate on longer videos and more lighting conditions
 
 ---
 *Author: Rohit Hebbar*  
