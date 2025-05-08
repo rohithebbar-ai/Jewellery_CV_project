@@ -188,10 +188,12 @@ The metrics on inference video is :
 
 Below are example frames showing ring detection and finger association:
 
-![Ring detection example 1](Assets/inference_video_snapshot_1.png)
+![Ring detection example 1](Assets/Inference_video_snapshot_1.png)
+
 *Ring detected and associated with left thumb.*
 
 ![Ring detection example 2](Assets/Inference_video_snapshot_2.png)
+
 *Ring detected and associated with right middle finger.*
 
 ## ⚠️ Limitations 
