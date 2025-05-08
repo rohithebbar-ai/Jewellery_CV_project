@@ -21,7 +21,7 @@ Key scripts for this pipeline:
 We fine-tuned the yolov8n.pt model on a dataset of 150 ring-wearing hand images using the ultralytics.YOLO interface. To boost generalization, the following augmentations were applied:
 	
 • Each training batch is randomly augmented on-the-fly during each epoch.
-•	So over 50 epochs, each image may be seen with dozens of different combinations of mosaic + mixup + RandAugment + flips/transforms.
+• So over 50 epochs, each image may be seen with dozens of different combinations of mosaic + mixup + RandAugment + flips/transforms.
 
 
 - ✅ Auto Augmentation: auto_augment="RandAugment" used for automatic policy selection
