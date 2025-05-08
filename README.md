@@ -19,6 +19,7 @@ Key scripts for this pipeline:
 ## 🔧 Training the YOLOv8 Ring Detector
 
 We fine-tuned the yolov8n.pt model on a dataset of 150 ring-wearing hand images using the ultralytics.YOLO interface. To boost generalization, the following augmentations were applied:
+
 	- ✅ Auto Augmentation: auto_augment="RandAugment" used for automatic policy selection
 	- ✅ Mosaic Augmentation: Enabled via mosaic=1.0
 	- ✅ MixUp Augmentation: Enabled via mixup=0.5
