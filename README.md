@@ -184,8 +184,8 @@ The metrics on inference video is :
 | Stability      | angle_std (ID -1)          | 0.000000    |
 
 <p float="left">
-  <img src="assets/hand_ring_1.png" width="45%" />
-  <img src="assets/hand_ring_2.png" width="45%" />
+  <img src="Assets/Inference_video_snapshot_1.png" width="45%" />
+  <img src="Assets/Inference_video_snapshot_2.png" width="45%" />
 </p>
 
 <p float="left">
