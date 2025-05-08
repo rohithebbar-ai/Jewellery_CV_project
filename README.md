@@ -127,7 +127,7 @@ python3 scripts/ring_detection_yolov8/video_inference.py   --model models/ring_d
 
 ---
 
-## 🧠 Why YOLOv8 + MediaPipe?
+## 🧠 Why YOLOv8 + MediaPipe + DeepSORT?
 
 - YOLOv8 is fast and efficient for object detection.
 - MediaPipe gives reliable finger landmark localization.
@@ -156,6 +156,31 @@ python3 scripts/ring_detection_yolov8/video_inference.py   --model models/ring_d
   - The output data and results from yolov8 can be found here. 
 https://drive.google.com/drive/folders/1obQbFBas9fBcFqtzuC62j3nWm8QUYwjf?usp=sharing
 
+The metrics on inference video is :
+| Category       | Metric                     | Value       |
+|----------------|----------------------------|-------------|
+| Detection      | precision                  | 0.250000    |
+| Detection      | recall                     | 0.263158    |
+| Detection      | f1                         | 0.256410    |
+| Detection      | per_frame_detection_rate   | 0.130435    |
+| IoU stats      | mean_iou                   | 0.244541    |
+| IoU stats      | median_iou                 | 0.062445    |
+| Assoc Accuracy | assoc_accuracy             | 0.000000    |
+| Tracking       | mota                       | 0.157895    |
+| Tracking       | idf1                       | 0.217949    |
+| Tracking       | num_switches               | 20.000000   |
+| Tracking       | mostly_tracked             | 1.000000    |
+| Tracking       | mostly_lost                | 1.000000    |
+| Stability      | max_drift (ID 1)           | 626.516161  |
+| Stability      | area_var_norm (ID 1)       | 0.518888    |
+| Stability      | angle_std (ID 1)           | 0.693014    |
+| Stability      | max_drift (ID 2)           | 832.358368  |
+| Stability      | area_var_norm (ID 2)       | 0.553418    |
+| Stability      | angle_std (ID 2)           | 0.892142    |
+| Stability      | max_drift (ID -1)          | 660.713061  |
+| Stability      | area_var_norm (ID -1)      | 1.000000    |
+| Stability      | angle_std (ID -1)          | 0.000000    |
+
 
 ## 🔭 Limitations & Future Work
 
@@ -168,7 +193,6 @@ https://drive.google.com/drive/folders/1obQbFBas9fBcFqtzuC62j3nWm8QUYwjf?usp=sha
   - Replace MediaPipe with 3D hand pose model (e.g. FrankMocap)
   - Evaluate on longer videos and more lighting conditions
 
----
 ---
 *Author: Rohit Hebbar*  
 *Date: 25-04-2025*
