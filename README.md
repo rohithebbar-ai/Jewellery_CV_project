@@ -188,7 +188,7 @@ The metrics on inference video is :
   <img src="Assets/Inference_video_snapshot_2.png" width="45%" />
 </p>
 
-<div style="display: flex; justify-content: space-between; width: 90%;">
+<div style="display: flex; justify-content: space-between; width: 300%;">
   <em style="width: 45%; text-align: center;">Ring on left thumb</em>
   <em style="width: 45%; text-align: center;">Ring on right middle finger</em>
 </div>
