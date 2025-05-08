@@ -23,6 +23,8 @@ def find_closest_landmark(ring_center, hand_landmarks):
 # utils/ring_finger_matcher.py
 import math
 
+FINGER_TIP_IDS = [4, 8, 12, 16, 20]
+
 def euclidean_3d(p1, p2):
     """3D Euclidean distance."""
     return math.sqrt(
@@ -55,9 +57,12 @@ def find_closest_landmark_3d(ring_center, hand_landmarks, angle_thresh=0.6):
     """
     best = (None, None)
     best_score = float('inf')
+
     for h_idx, hand in enumerate(hand_landmarks):
-        for lm_idx, lm in enumerate(hand.landmark):
+        for lm_idx in FINGER_TIP_IDS:
+            lm = hand.landmark[lm_idx]
             # 1) 3D distance: use lm.z as depth
+
             dist3d = euclidean_3d(
                 (ring_center[0], ring_center[1], 0.0),  # assume ring z~0
                 (lm.x, lm.y, lm.z)
