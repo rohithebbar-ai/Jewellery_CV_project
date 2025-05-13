@@ -168,8 +168,8 @@ python3 scripts/ring_detection_yolov8/video_inference.py   --model models/ring_d
 - **Results**:
   - mAP@0.5: **0.77** on held-out set
   - Visual outputs: `results/metrics_plots.png`, `results/val_batch_pred.jpg`
-  - The output data and results from yolov8 can be found here. 
-https://drive.google.com/drive/folders/1obQbFBas9fBcFqtzuC62j3nWm8QUYwjf?usp=sharing
+  - The output data and results from yolov8 can be found <a href="https://drive.google.com/drive/folders/1obQbFBas9fBcFqtzuC62j3nWm8QUYwjf?usp=sharing">here. </a> 
+
 
 The metrics on inference video is :
 | Category       | Metric                     | Value       |
