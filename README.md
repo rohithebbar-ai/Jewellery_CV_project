@@ -181,21 +181,15 @@ The metrics on inference video is :
 | Detection      | per_frame_detection_rate   | 0.130435    |
 | IoU stats      | mean_iou                   | 0.244541    |
 | IoU stats      | median_iou                 | 0.062445    |
-| Assoc Accuracy | assoc_accuracy             | 0.000000    |
 | Tracking       | mota                       | 0.157895    |
 | Tracking       | idf1                       | 0.217949    |
 | Tracking       | num_switches               | 20.000000   |
-| Tracking       | mostly_tracked             | 1.000000    |
-| Tracking       | mostly_lost                | 1.000000    |
 | Stability      | max_drift (ID 1)           | 626.516161  |
-| Stability      | area_var_norm (ID 1)       | 0.518888    |
 | Stability      | angle_std (ID 1)           | 0.693014    |
 | Stability      | max_drift (ID 2)           | 832.358368  |
 | Stability      | area_var_norm (ID 2)       | 0.553418    |
 | Stability      | angle_std (ID 2)           | 0.892142    |
 | Stability      | max_drift (ID -1)          | 660.713061  |
-| Stability      | area_var_norm (ID -1)      | 1.000000    |
-| Stability      | angle_std (ID -1)          | 0.000000    |
 
 
 <div style="display: inline-block; text-align: center; width: 45%;">
@@ -245,6 +239,8 @@ Could also try:
    - Evaluate on longer videos and more lighting conditions
 
 ---
+If you want to access the presentation, you can download it from <a href="https://docs.google.com/presentation/d/1cAoT7l6nCDxjiIY1YWsG8-TICdn5rztq/edit?usp=sharing&ouid=105997458044168433519&rtpof=true&sd=true">here.t</a>
+
 *Author: Rohit Hebbar*  
 *Date: 25-04-2025*
 
