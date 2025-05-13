@@ -67,8 +67,8 @@ Jewellery_CV_project/
 └── requirements.txt     # pip install dependencies
 ```
 
-The input video of Anna wearing two rings is also taken from open source website (pexels). The link to this can be found here.
-https://drive.google.com/drive/folders/1K7d8S23CNhajPP5urI9vxSbaihlwNwh2?usp=sharing
+The input video of Anna wearing two rings is also taken from open source website (pexels). The link to this can be found here.<a href="https://drive.google.com/drive/folders/1K7d8S23CNhajPP5urI9vxSbaihlwNwh2?usp=sharing">Dataset</a>
+
 
 ## Setup & Installation
 1. **Clone** this repository:
@@ -92,8 +92,7 @@ Make sure you have the following:
   
 3. **Download MediaPipe models** (if needed) and place at `venv/lib/python*/site-packages/mediapipe/models/`.
 
-4. If you want to use the dataset for finetuning yolo for ring detection then you can download it on this link. All the data is taken from open source and manually labelled using labellmg.
- https://drive.google.com/drive/folders/1YCnSLYkh-kb_fMOOBuTN2BkdPO3fovNr?usp=sharing
+4. If you want to use the dataset for finetuning yolo for ring detection then you can download it on this link. All the data is taken from open source and manually labelled using labellmg. <a href=" https://drive.google.com/drive/folders/1YCnSLYkh-kb_fMOOBuTN2BkdPO3fovNr?usp=sharing">Ring_Dataset</a>
 
 ## Running the Pipeline
 
@@ -239,7 +238,7 @@ Could also try:
    - Evaluate on longer videos and more lighting conditions
 
 ---
-If you want to access the presentation, you can download it from <a href="https://docs.google.com/presentation/d/1cAoT7l6nCDxjiIY1YWsG8-TICdn5rztq/edit?usp=sharing&ouid=105997458044168433519&rtpof=true&sd=true">here.t</a>
+If you want to access the presentation, you can download it from <a href="https://docs.google.com/presentation/d/1cAoT7l6nCDxjiIY1YWsG8-TICdn5rztq/edit?usp=sharing&ouid=105997458044168433519&rtpof=true&sd=true">here.</a>
 
 *Author: Rohit Hebbar*  
 *Date: 25-04-2025*
